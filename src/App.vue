@@ -178,7 +178,7 @@ window.addEventListener('keydown', (event) => {
         </div>
       </template>
     </div>
-    <div>
+    <div class="instructions">
       <h2>Rules</h2>
       <p>
         All circles must be filled with black dots. You may move one space at a time, however, if you attempt to move toward a dot, you will instead swap places with it (regardless of distance).
@@ -210,10 +210,17 @@ window.addEventListener('keydown', (event) => {
   padding: 20px;
 }
 
+.instructions {
+  max-width: 25vw;
+}
+
 .grid {
 	display: grid;
 	grid-template-columns: repeat(11, 1fr);
 	grid-template-rows: repeat(11, 1fr);
+
+  width: 100%;
+  max-width: 550px;
 
 	border-right: 1px solid #aaa;
 	border-bottom: 1px solid #aaa;

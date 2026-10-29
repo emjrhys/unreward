@@ -33,8 +33,34 @@ const desiredState = reactive([
 const currentPositionX = ref(9)
 const currentPositionY = ref(9)
 
-const state = ref(initialState)
+type Snapshot = {
+	grid: number[][]
+	x: number
+	y: number
+}
+
+function cloneGrid(grid: number[][]): number[][] {
+	return grid.map(row => [...row])
+}
+
+const state = ref(cloneGrid(initialState))
 state.value[currentPositionY.value][currentPositionX.value] = 2
+
+const history: Snapshot[] = []
+
+function snapshot(): Snapshot {
+	return {
+		grid: cloneGrid(state.value),
+		x: currentPositionX.value,
+		y: currentPositionY.value,
+	}
+}
+
+function restore(snap: Snapshot) {
+	state.value = cloneGrid(snap.grid)
+	currentPositionX.value = snap.x
+	currentPositionY.value = snap.y
+}
 
 function checkLineOfSight(direction: 'up' | 'down' | 'left' | 'right') {
 	if (direction === 'up') {
@@ -66,6 +92,7 @@ function checkLineOfSight(direction: 'up' | 'down' | 'left' | 'right') {
 }
 
 function move(direction: 'up' | 'down' | 'left' | 'right') {
+	const previous = snapshot()
 	let oldPositionX = currentPositionX.value
 	let oldPositionY = currentPositionY.value
 	const lineOfSight = checkLineOfSight(direction)
@@ -88,6 +115,15 @@ function move(direction: 'up' | 'down' | 'left' | 'right') {
 		state.value[oldPositionY][oldPositionX] = 0
 		state.value[currentPositionY.value][currentPositionX.value] = 2
 	}
+	if (currentPositionX.value !== previous.x || currentPositionY.value !== previous.y) {
+		history.push(previous)
+	}
+}
+
+function undo() {
+	const previous = history.pop()
+	if (!previous) return
+	restore(previous)
 }
 
 function reset() {
@@ -103,13 +139,17 @@ window.addEventListener('keydown', (event) => {
 		move('left')
 	} else if (event.key === 'ArrowRight' || event.key === 'd') {
 		move('right')
+	} else if (event.key === 'z') {
+		undo()
+	} else if (event.key === 'r') {
+		reset()
 	}
 })
 </script>
 
 <template>
   <div class="grid">
-	<template v-for="(itemRow, rowIndex) in initialState" :key="rowIndex">
+	<template v-for="(itemRow, rowIndex) in state" :key="rowIndex">
 		<div class="grid-item-wrapper" v-for="(item, itemIndex) in itemRow" :key="itemIndex">
 			<GridItem :currentItem="item" :desiresItem="desiredState[rowIndex]?.[itemIndex] ?? false" />
 		</div>

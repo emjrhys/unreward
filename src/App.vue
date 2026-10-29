@@ -63,7 +63,7 @@ function restore(snap: Snapshot) {
 }
 
 function checkLineOfSight(direction: 'up' | 'down' | 'left' | 'right') {
-	if (direction === 'up') {
+  	if (direction === 'up') {
 		for (let i = currentPositionY.value - 1; i >= 0; i--) {
 			if (state.value[i][currentPositionX.value] === 1) {
 				return { x: currentPositionX.value, y: i }
@@ -89,6 +89,19 @@ function checkLineOfSight(direction: 'up' | 'down' | 'left' | 'right') {
 		}
 	}
 	return null
+}
+
+const win = ref(false)
+function checkWin() {
+	for (let y = 0; y < state.value.length; y++) {
+		for (let x = 0; x < state.value[y].length; x++) {
+			if (desiredState[y][x] && state.value[y][x] !== 1) {
+				return win.value = false
+			}
+		}
+	}
+  alert('You did it!')
+	return win.value = true
 }
 
 function move(direction: 'up' | 'down' | 'left' | 'right') {
@@ -118,6 +131,10 @@ function move(direction: 'up' | 'down' | 'left' | 'right') {
 	if (currentPositionX.value !== previous.x || currentPositionY.value !== previous.y) {
 		history.push(previous)
 	}
+
+  if (!win.value) {
+    checkWin()
+  }
 }
 
 function undo() {
@@ -127,7 +144,12 @@ function undo() {
 }
 
 function reset() {
-	window.location.reload()
+  state.value = cloneGrid(initialState)
+  currentPositionX.value = 9
+  currentPositionY.value = 9
+  history.length = 0
+  state.value[currentPositionY.value][currentPositionX.value] = 2
+  win.value = false
 }
 
 window.addEventListener('keydown', (event) => {
@@ -152,7 +174,7 @@ window.addEventListener('keydown', (event) => {
     <div class="grid">
       <template v-for="(itemRow, rowIndex) in state" :key="rowIndex">
         <div class="grid-item-wrapper" v-for="(item, itemIndex) in itemRow" :key="itemIndex">
-          <GridItem :currentItem="item" :desiresItem="desiredState[rowIndex]?.[itemIndex] ?? false" />
+          <GridItem :currentItem="item" :desiresItem="desiredState[rowIndex]?.[itemIndex] === 1" />
         </div>
       </template>
     </div>
@@ -162,8 +184,20 @@ window.addEventListener('keydown', (event) => {
         All circles must be filled with black dots. You may move one space at a time, however, if you attempt to move toward a dot, you will instead swap places with it (regardless of distance).
       </p>
       <h2>Controls</h2>
-      <p>Use arrow keys or WASD to move. Press Z to undo. Press R to reset, or click the button below.</p>
-      <button @click="reset">Reset</button>
+      <p>Use arrow keys or WASD to move, or use the buttons below.</p>
+      <div class="button-wrapper">
+        <button @click="move('left')">Move left</button>
+        <div class="button-wrapper vertical">
+          <button @click="move('up')">Move up</button>
+          <button @click="move('down')">Move down</button>
+        </div> 
+        <button @click="move('right')">Move right</button>
+      </div>
+      <p>Press Z to undo, R to reset, or use the buttons below.</p>
+      <div class="button-wrapper">
+        <button @click="undo">Undo</button>
+        <button @click="reset">Reset</button>
+      </div>
     </div>
   </div>
 </template>
@@ -181,9 +215,6 @@ window.addEventListener('keydown', (event) => {
 	grid-template-columns: repeat(11, 1fr);
 	grid-template-rows: repeat(11, 1fr);
 
-	width: 600px;
-	height: 600px;
-
 	border-right: 1px solid #aaa;
 	border-bottom: 1px solid #aaa;
 }
@@ -197,5 +228,14 @@ window.addEventListener('keydown', (event) => {
 
 	border-top: 1px solid #aaa;
 	border-left: 1px solid #aaa;
+}
+
+.button-wrapper {
+  display: flex;
+  gap: 10px;
+}
+
+.button-wrapper.vertical {
+  flex-direction: column;
 }
 </style>

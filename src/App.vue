@@ -148,23 +148,34 @@ window.addEventListener('keydown', (event) => {
 </script>
 
 <template>
-  <div class="grid">
-	<template v-for="(itemRow, rowIndex) in state" :key="rowIndex">
-		<div class="grid-item-wrapper" v-for="(item, itemIndex) in itemRow" :key="itemIndex">
-			<GridItem :currentItem="item" :desiresItem="desiredState[rowIndex]?.[itemIndex] ?? false" />
-		</div>
-	</template>
-  </div>
-  <div>
-	<h2>Rules</h2>
-	<p>
-		All circles must be filled with black dots. You may move one space at a time, however, if you attempt to move toward a dot, you will instead swap places with it (regardless of distance). Use arrow keys or WASD to move.
-	</p>
-	<button @click="reset">Reset</button>
+	<div class="content-wrapper">
+    <div class="grid">
+      <template v-for="(itemRow, rowIndex) in state" :key="rowIndex">
+        <div class="grid-item-wrapper" v-for="(item, itemIndex) in itemRow" :key="itemIndex">
+          <GridItem :currentItem="item" :desiresItem="desiredState[rowIndex]?.[itemIndex] ?? false" />
+        </div>
+      </template>
+    </div>
+    <div>
+      <h2>Rules</h2>
+      <p>
+        All circles must be filled with black dots. You may move one space at a time, however, if you attempt to move toward a dot, you will instead swap places with it (regardless of distance).
+      </p>
+      <h2>Controls</h2>
+      <p>Use arrow keys or WASD to move. Press Z to undo. Press R to reset, or click the button below.</p>
+      <button @click="reset">Reset</button>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.content-wrapper {
+  display: flex;
+  gap: 20px;
+
+  padding: 20px;
+}
+
 .grid {
 	display: grid;
 	grid-template-columns: repeat(11, 1fr);
